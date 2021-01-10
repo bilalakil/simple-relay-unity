@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "me.bilalakil.simple-relay-unity",
+  "displayName": "Simple Relay",
+  "type": "library",
+  "description": "Client for the Simple Relay \"server\": https://github.com/bilalakil/simple-relay",
+  "author": {
+    "name": "Bilal Akil",
+    "email": "mail@bilalakil.me",
+    "url": "https://bilalakil.me"
+  }
+}
