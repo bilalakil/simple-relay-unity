@@ -1,9 +1,6 @@
 // Compatible with SimpleRelay >v2.0.0
 // https://github.com/bilalakil/simple-relay
 
-#define SR_DEBUG
-//#define SR_DEBUG_INFO
-
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -46,9 +43,8 @@ public class SimpleRelay : MonoBehaviour
     
     static void IDebugInfoS(string msg)
     {
-#if SR_DEBUG && SR_DEBUG_INFO
-        Debug.Log(string.Format("INFO SimpleRelay: {0}", msg));
-#endif
+        if (PkgConfig.debugLevel >= SimpleRelayConfig.DebugLevel.Info)
+            Debug.Log(string.Format("INFO SimpleRelay: {0}", msg));
     }
 
     static SimpleRelay()
@@ -142,18 +138,13 @@ public class SimpleRelay : MonoBehaviour
     [NonSerialized] CancellationTokenSource _wsCancellation;
     [NonSerialized] CancellationTokenSource _objCancellation;
 
-    void IDebugError(string msg)
-    {
-#if SR_DEBUG
+    void IDebugError(string msg) =>
         Debug.LogError(string.Format("ERROR SimpleRelay {0}: {1}", _config.localId, msg));
-#endif
-    }
     
     void IDebugInfo(string msg)
     {
-#if SR_DEBUG && SR_DEBUG_INFO
-        Debug.Log(string.Format("INFO SimpleRelay {0}: {1}", _config.localId, msg));
-#endif
+        if (PkgConfig.debugLevel >= SimpleRelayConfig.DebugLevel.Info)
+            Debug.Log(string.Format("INFO SimpleRelay {0}: {1}", _config.localId, msg));
     }
 
     void OnEnable()
@@ -482,10 +473,10 @@ public class SimpleRelay : MonoBehaviour
 
     void HandleWSMessageReceived(string json)
     {
-#if SR_DEBUG_INFO
-        if (json != "[{\"type\":\"HEARTBEAT\"}]")
-            IDebugInfo("Received message: " + json);
-#endif
+        if (
+            PkgConfig.debugLevel >= SimpleRelayConfig.DebugLevel.Info &&
+            json != "[{\"type\":\"HEARTBEAT\"}]"
+        ) IDebugInfo("Received message: " + json);
 
         Messages messages;
         try
