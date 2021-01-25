@@ -20,6 +20,7 @@ public class SimpleRelay : MonoBehaviour
     const float PING_FREQUENCY = 3f;
     const string PP_SAVED_CONFIG_TEMPLATE = "SimpleRelay_SavedConfig_{0}";
     const int WS_CONNECTION_RETRIES = 2;
+    const int WS_RETRY_DELAY_MS = 10;
     
     static readonly HttpClient HttpClient;
     static readonly TimeSpan NotifyDisconnectPeriod = TimeSpan.FromSeconds(1f);
@@ -224,11 +225,15 @@ public class SimpleRelay : MonoBehaviour
 
         KillWS();
 
+        _state.connStatus = 
+            _state.DCReason == SRState.DisconnectReason.InitialConnectionFailed
+                ? SRState.ConnectionStatus.Connecting
+                : _state.connStatus = SRState.ConnectionStatus.Disconnected;
+
         if (_state.memberNum != -1)
             _state.memberPresence[_state.memberNum] = false;
         _state.ready = false;
         _state.disconnectReason = SRState.DisconnectReason.ConnectionDied;
-        _state.connStatus = SRState.ConnectionStatus.Disconnected;
 
         RunWS();
     }
@@ -365,7 +370,9 @@ public class SimpleRelay : MonoBehaviour
             while (_waitingForNotifyDisconnect.Count != 0)
             {
                 await Task.Run(
-                    () => localCancellation.Token.WaitHandle.WaitOne(10)
+                    () => localCancellation.Token.WaitHandle.WaitOne(
+                        WS_RETRY_DELAY_MS
+                    )
                 );
                 if (localCancellation.IsCancellationRequested)
                     return;
