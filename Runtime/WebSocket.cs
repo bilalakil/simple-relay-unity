@@ -1,6 +1,3 @@
-#define WS_DEBUG
-//#define WS_DEBUG_INFO
-
 using System;
 using System.Threading;
 
@@ -40,9 +37,8 @@ public class WebSocket : IWebSocket, IDisposable
 {
     public static void IDebugInfo(string msg)
     {
-#if WS_DEBUG && WS_DEBUG_INFO
-        UnityEngine.Debug.Log("INFO WebSocket: " + msg);
-#endif
+        if (SimpleRelay.PkgConfig.wsDebugLevel >= SimpleRelayConfig.DebugLevel.Info)
+            UnityEngine.Debug.Log("INFO WebSocket: " + msg);
     }
 
     ClientWebSocket _ws;

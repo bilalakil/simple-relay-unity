@@ -31,7 +31,7 @@ public class SimpleRelay : MonoBehaviour
     static readonly HashSet<SimpleRelay> _waitingForNotifyDisconnect = new HashSet<SimpleRelay>();
 
     static SimpleRelayConfig _pkgConfig;
-    static SimpleRelayConfig PkgConfig
+    internal static SimpleRelayConfig PkgConfig
     {
         get
         {
@@ -41,17 +41,25 @@ public class SimpleRelay : MonoBehaviour
             return _pkgConfig;
         }
     }
-    
-    static void IDebugInfoS(string msg)
-    {
-        if (PkgConfig.debugLevel >= SimpleRelayConfig.DebugLevel.Info)
-            Debug.Log(string.Format("INFO SimpleRelay: {0}", msg));
-    }
 
     static SimpleRelay()
     {
         HttpClient = new HttpClient();
         HttpClient.Timeout = TimeSpan.FromSeconds(PING_FREQUENCY);
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void Reset()
+    {
+        _pkgConfig = null;
+        _liveSRIDs.Clear();
+        _waitingForNotifyDisconnect.Clear();
+    }
+    
+    static void IDebugInfoS(string msg)
+    {
+        if (PkgConfig.srDebugLevel >= SimpleRelayConfig.DebugLevel.Info)
+            Debug.Log(string.Format("INFO SimpleRelay: {0}", msg));
     }
 
     public static bool CanTryRejoining(string sessionType, string localId = DEFAULT_LOCAL_ID)
@@ -144,7 +152,7 @@ public class SimpleRelay : MonoBehaviour
     
     void IDebugInfo(string msg)
     {
-        if (PkgConfig.debugLevel >= SimpleRelayConfig.DebugLevel.Info)
+        if (PkgConfig.srDebugLevel >= SimpleRelayConfig.DebugLevel.Info)
             Debug.Log(string.Format("INFO SimpleRelay {0}: {1}", _config.localId, msg));
     }
 
@@ -481,7 +489,7 @@ public class SimpleRelay : MonoBehaviour
     void HandleWSMessageReceived(string json)
     {
         if (
-            PkgConfig.debugLevel >= SimpleRelayConfig.DebugLevel.Info &&
+            PkgConfig.srDebugLevel >= SimpleRelayConfig.DebugLevel.Info &&
             json != "[{\"type\":\"HEARTBEAT\"}]"
         ) IDebugInfo("Received message: " + json);
 
